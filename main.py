@@ -104,9 +104,28 @@ def crossed_up(df):
 
     return (
         prev["close"] <= prev["ema20"]
-        and
-        last["close"] > last["ema20"]
+        and last["close"] > last["ema20"]
+        and ema_slope
+        and distance >= 0.5
+        and volume_ok
+        and trend_ok(df)
     )
+
+def trend_ok(df):
+
+    if len(df) < 10:
+        return False
+
+    last_7 = df.tail(7)
+
+    lows = last_7["low"].astype(float).values
+    ema = last_7["ema20"].values
+
+    ema_trend = all(ema[i] >= ema[i-1] for i in range(1, len(ema)))
+
+    price_trend = lows[-1] > lows[0]
+
+    return ema_trend and price_trend
 
 def main():
 
