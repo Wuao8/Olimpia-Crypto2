@@ -3,7 +3,7 @@ import json
 import requests
 import pandas as pd
 from ta.trend import EMAIndicator
-from ta.momentum import RSIIndicator
+
 
 BASE_URL = "https://api.mexc.com"
 
@@ -95,12 +95,40 @@ def get_daily_dataframe(symbol):
         window=20
     ).ema_indicator()
 
-    df["rsi"] = RSIIndicator(
-        close=df["close"],
-        window=14
-    ).rsi()
-
     return df
+
+
+
+    
+
+def trend_score(df):
+
+    last_7 = df.tail(7)
+
+    ema_slope = last_7["ema20"].iloc[-1] - last_7["ema20"].iloc[0]
+
+    price_slope = last_7["close"].iloc[-1] - last_7["close"].iloc[0]
+
+    return ema_slope + price_slope
+
+
+def trend_continuation(df):
+
+    if len(df) < 3:
+        return False
+
+    c1 = df.iloc[-3]  # breakout candle
+    c2 = df.iloc[-2]  # follow candle
+    c3 = df.iloc[-1]  # confirmation candle
+
+    breakout = c1["close"] <= c1["ema20"] and c2["close"] > c2["ema20"]
+
+    continuation = (
+        c3["close"] > c3["ema20"]
+        and c3["open"] > c2["close"]
+    )
+
+    return breakout and continuation
 
 
 def crossed_up(df):
@@ -114,30 +142,14 @@ def crossed_up(df):
 
     volume_ok = float(last["volume"]) > 1_000_000
 
-    rsi_ok = last["rsi"] < 70
-
-    score_ok = trend_score(df) > 0
-
     return (
         prev["close"] <= prev["ema20"]
         and last["close"] > last["ema20"]
         and ema_slope
         and distance >= 0.5
         and volume_ok
-        and rsi_ok
-        and score_ok
+        and trend_continuation(df)
     )
-    
-
-def trend_score(df):
-
-    last_7 = df.tail(7)
-
-    ema_slope = last_7["ema20"].iloc[-1] - last_7["ema20"].iloc[0]
-
-    price_slope = last_7["close"].iloc[-1] - last_7["close"].iloc[0]
-
-    return ema_slope + price_slope
     
 
 def main():
