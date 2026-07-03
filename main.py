@@ -78,15 +78,17 @@ def get_daily_dataframe(symbol):
 
     df = pd.DataFrame(data)
 
-    df = df.iloc[:, :6]
-    df.columns = [
-        "time",
-        "open",
-        "high",
-        "low",
-        "close",
-        "volume",
-    ]
+   df = df.iloc[:, :6]
+
+   df.columns = ["time", "open", "high", "low", "close", "volume"]
+
+   df = df.astype({
+       "open": float,
+       "high": float,
+       "low": float,
+       "close": float,
+       "volume": float
+   })
 
     df["close"] = df["close"].astype(float)
 
