@@ -1,7 +1,7 @@
 import os
 import requests
 
-TOKEN = os.environ["BOT_TOKEN"]
+TOKEN = os.environ["TOKEN"]
 CHAT_ID = os.environ["CHAT_ID"]
 
 
