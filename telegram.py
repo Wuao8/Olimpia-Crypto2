@@ -11,7 +11,7 @@ def send(msg):
         data={
             "chat_id": CHAT_ID,
             "text": msg,
-            "parse_mode": "HTML"
+            "parse_mode": "HTML" 
         },
         timeout=20
     )
