@@ -92,6 +92,14 @@ def check_signal(df):
     return True
 
 
+def liquidity_ok(df):
+
+    # ultimo volume 24h approx (somma ultime 24 candele 1D)
+    vol_24h = df["volume"].iloc[-1]
+
+    return vol_24h >= 3_000_000
+
+
 def main():
 
     sent = load_sent()
@@ -105,6 +113,9 @@ def main():
         try:
 
             df = get_klines(symbol)
+
+            if not liquidity_ok(df):
+                continue
 
             if check_signal(df):
 
